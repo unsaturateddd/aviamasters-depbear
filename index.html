@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Испытай удачу</title>
+
+<link rel="preload" href="fonts/BenzinBold.woff2" as="font" type="font/woff2" crossorigin>
+
+<style>
+@font-face{
+  font-family:"BenzinBold";
+  src:url("fonts/BenzinBold.woff2") format("woff2");
+  font-display:swap;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  min-height:100vh;
+  background:radial-gradient(circle at top,#3a7bd5,#1e3c72 60%,#0b1c3a);
+  font-family:Inter,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* ❄️ СНЕГ */
+.snowflake{
+  position:fixed;
+  top:-10px;
+  color:rgba(255,255,255,.95);
+  pointer-events:none;
+  animation:fall linear infinite;
+  z-index:10000;
+}
+@keyframes fall{
+  to{transform:translateY(110vh);opacity:0}
+}
+
+/* ===== PRELOADER ===== */
+#preloader{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at top,#3a7bd5,#1e3c72 60%,#0b1c3a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  transition:.6s;
+}
+#preloader.hide{
+  opacity:0;
+  pointer-events:none;
+}
+
+.loader-box{
+  text-align:center;
+  font-family:BenzinBold;
+}
+
+.spinner{
+  width:70px;
+  height:70px;
+  border:5px solid rgba(255,255,255,.3);
+  border-top:5px solid #fff;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:0 auto 20px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.percent{
+  margin-top:10px;
+  font-size:22px;
+}
+
+/* ===== MAIN ===== */
+.container{
+  max-width:480px;
+  width:100%;
+  text-align:center;
+  z-index:5;
+}
+
+.video-box{
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(14px);
+}
+
+video{
+  width:100%;
+  display:block;
+  background:#000;
+}
+
+.play-btn{
+  margin:25px auto 0;
+  width:100%;
+  max-width:320px;
+  padding:16px;
+  font-family:BenzinBold;
+  font-size:18px;
+  border-radius:50px;
+  border:none;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(135deg,#ffb347,#ff416c);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
+
+h2{
+  margin-top:40px;
+  font-family:BenzinBold;
+  background:linear-gradient(135deg,#fff,#b3e5ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.tg-btn{
+  display:inline-block;
+  margin-top:20px;
+  padding:14px 30px;
+  font-family:BenzinBold;
+  border-radius:50px;
+  background:linear-gradient(135deg,#00b7ff,#007fff);
+  color:#fff;
+  text-decoration:none;
+}
+
+/* ===== POPUP ===== */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  visibility:hidden;
+  transition:.4s;
+  z-index:20;
+  padding:20px;
+}
+.popup.active{
+  opacity:1;
+  visibility:visible;
+}
+
+.popup-box{
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(18px);
+  padding:18px;
+  border-radius:18px;
+  text-align:center;
+  max-width:320px;
+  width:100%;
+}
+
+.win-amount{
+  color:#ff9f1a;
+  font-weight:900;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="loader-box">
+    <div class="spinner"></div>
+    <p>Загрузка Aviamasters X-Mas…</p>
+    <div class="percent" id="percent">0%</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="video-box">
+    <video id="video" poster="images/preview.png" preload="metadata" playsinline muted>
+      <source src="video/promo.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <button class="play-btn" id="play">🎄 ИСПЫТАТЬ УДАЧУ</button>
+
+  <h2>НАЧНИ ИГРАТЬ</h2>
+  <a href="https://t.me/+qVTBXaWbtcs4M2Vk" class="tg-btn" target="_blank">
+    Перейти в Telegram
+  </a>
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-box">
+    <h3>💰 Вы могли выиграть <span class="win-amount">33 125 ₽</span></h3>
+    <p>Попробуй прямо сейчас</p>
+    <a href="https://t.me/+qVTBXaWbtcs4M2Vk" class="tg-btn" target="_blank">
+      Испытать удачу
+    </a>
+  </div>
+</div>
+
+<script>
+/* ❄️ СНЕГ */
+setInterval(()=>{
+  const s=document.createElement('div');
+  s.className='snowflake';
+  s.style.left=Math.random()*100+'vw';
+  s.style.fontSize=10+Math.random()*18+'px';
+  s.style.animationDuration=5+Math.random()*6+'s';
+  s.innerHTML='❄';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),11000);
+},250);
+
+/* PRELOADER */
+const percentEl=document.getElementById('percent');
+const preloader=document.getElementById('preloader');
+const video=document.getElementById('video');
+
+let progress=0;
+let done=false;
+
+const fake=setInterval(()=>{
+  if(progress<90){
+    progress++;
+    percentEl.textContent=progress+'%';
+  }
+},35);
+
+function finishLoader(){
+  if(done) return;
+  done=true;
+  clearInterval(fake);
+
+  const fin=setInterval(()=>{
+    if(progress<100){
+      progress++;
+      percentEl.textContent=progress+'%';
+    }else{
+      clearInterval(fin);
+      setTimeout(()=>preloader.classList.add('hide'),300);
+    }
+  },15);
+}
+
+video.addEventListener('loadeddata', finishLoader, { once:true });
+setTimeout(finishLoader, 4000);
+
+/* VIDEO + POPUP */
+document.getElementById('play').onclick=async()=>{
+  try{
+    video.muted=false;
+    await video.play();
+  }catch{
+    video.play();
+  }
+  setTimeout(()=>document.getElementById('popup').classList.add('active'),13000);
+};
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=104709922', 'ym');
+
+    ym(104709922, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/104709922" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+</body>
+</html>
